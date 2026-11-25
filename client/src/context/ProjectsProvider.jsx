@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ProjectsContext } from "./ProjectsContext";
 import { API_URL } from "../api";
 
@@ -6,23 +6,28 @@ const ProjectsProvider = ({ children }) => {
   const [projects, setProjects] = useState([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
 
-  useEffect(() => {
-    fetch(`${API_URL}/projects`)
-      .then((res) => res.json())
-      .then((data) => {
-        setProjects(data);
-        setProjectsLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setProjectsLoading(false);
-      });
+  const refreshProjects = useCallback(async () => {
+    setProjectsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/projects`);
+      const data = await res.json();
+      setProjects(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setProjectsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    refreshProjects();
+  }, [refreshProjects]);
 
   const projectsInfo = {
     projects,
     setProjects,
     projectsLoading,
+    refreshProjects,
   };
 
   return (

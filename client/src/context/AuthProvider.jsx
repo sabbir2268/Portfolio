@@ -3,6 +3,8 @@ import { AuthContext } from "./AuthContext";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase/firebase.init";
 
+const adminEmail = import.meta.env.VITE_ADMIN_EMAIL?.toLowerCase();
+
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -20,8 +22,13 @@ const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  const isAdmin = Boolean(
+    user && (!adminEmail || user.email?.toLowerCase() === adminEmail),
+  );
+
   const authInfo = {
     user,
+    isAdmin,
     authLoading,
     setAuthLoading,
     logOut,

@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import { API_URL } from "../../../api";
+import React, { useContext, useState } from "react";
+import { API_URL, getAuthHeaders } from "../../../api";
+import { ProjectsContext } from "../../../context/ProjectsContext";
 
 const AddProjects = () => {
+  const { refreshProjects } = useContext(ProjectsContext);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -26,25 +28,30 @@ const AddProjects = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(await getAuthHeaders()),
         },
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
-      console.log("Server response:", data);
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to add project");
+      }
+
+      await refreshProjects();
       alert("Project Added Successfully 🚀");
+      setFormData({
+        name: "",
+        description: "",
+        technologies: "",
+        categories: "Landing-page",
+        github: "",
+        live: "",
+      });
     } catch (error) {
       console.error("Error:", error);
+      alert(error.message);
     }
-
-    setFormData({
-      name: "",
-      description: "",
-      technologies: "",
-      categories: "Landing-page",
-      github: "",
-      live: "",
-    });
   };
 
   return (

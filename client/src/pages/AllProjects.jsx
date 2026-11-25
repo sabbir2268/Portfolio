@@ -13,7 +13,9 @@ const AllProjects = () => {
 
   // Group projects by category
   const projectsByCategory = projects.reduce((acc, project) => {
-    const category = project.categories || "Uncategorized";
+    const category = Array.isArray(project.categories)
+      ? project.categories[0] || "Uncategorized"
+      : project.categories || "Uncategorized";
     if (!acc[category]) acc[category] = [];
     acc[category].push(project);
     return acc;

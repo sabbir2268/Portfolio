@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebase.init";
 import { AuthContext } from "../../context/AuthContext";
 import { FaArrowLeft } from "react-icons/fa";
@@ -19,11 +19,21 @@ const LoginAsAdmin = () => {
     setAuthLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const allowedEmail = import.meta.env.VITE_ADMIN_EMAIL?.toLowerCase();
+
+      if (
+        allowedEmail &&
+        credential.user.email?.toLowerCase() !== allowedEmail
+      ) {
+        await signOut(auth);
+        throw new Error("This account is not allowed to access the admin panel.");
+      }
+
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
-      alert("Invalid email or password");
+      alert(error.message || "Invalid email or password");
     } finally {
       setAuthLoading(false);
     }

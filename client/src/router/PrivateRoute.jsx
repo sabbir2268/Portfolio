@@ -3,7 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 const PrivateRoute = ({ children }) => {
-  const { user, authLoading } = useContext(AuthContext);
+  const { user, isAdmin, authLoading } = useContext(AuthContext);
   const location = useLocation();
 
   if (authLoading) {
@@ -14,7 +14,7 @@ const PrivateRoute = ({ children }) => {
     );
   }
 
-  if (!user) {
+  if (!user || !isAdmin) {
     return <Navigate to="/loginAsAdmin" state={{ from: location }} replace />;
   }
   return children;

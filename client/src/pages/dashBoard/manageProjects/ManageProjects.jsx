@@ -1,9 +1,9 @@
 import React, { useContext, useState } from "react";
 import { ProjectsContext } from "../../../context/ProjectsContext";
-import { API_URL } from "../../../api";
+import { API_URL, getAuthHeaders } from "../../../api";
 
 const ManageProjects = () => {
-  const { projects, setProjects } = useContext(ProjectsContext);
+  const { projects, refreshProjects } = useContext(ProjectsContext);
   const [updateDataForm, setUpdateDataForm] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [formData, setFormData] = useState({
@@ -23,14 +23,17 @@ const ManageProjects = () => {
     try {
       const res = await fetch(`${API_URL}/projects/${id}`, {
         method: "DELETE",
+        headers: await getAuthHeaders(),
       });
-      if (res.ok) {
-        setProjects(projects.filter((project) => project._id !== id));
-        alert("Project deleted successfully!");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to delete project");
       }
+      await refreshProjects();
+      alert("Project deleted successfully!");
     } catch (err) {
       console.error(err);
-      alert("Failed to delete project");
+      alert(err.message);
     }
   };
 
@@ -69,6 +72,7 @@ const ManageProjects = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          ...(await getAuthHeaders()),
         },
         body: JSON.stringify({
           ...formData,
@@ -77,23 +81,17 @@ const ManageProjects = () => {
         }),
       });
 
-      if (res.ok) {
-        const updatedProject = {
-          ...selectedProject,
-          ...formData,
-          technologies: formData.technologies.split(","),
-          categories: formData.categories.split(","),
-        };
-
-        setProjects((prev) =>
-          prev.map((p) => (p._id === selectedProject._id ? updatedProject : p)),
-        );
-
-        alert("Project updated successfully!");
-        setUpdateDataForm(false);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to update project");
       }
+
+      await refreshProjects();
+      alert("Project updated successfully!");
+      setUpdateDataForm(false);
     } catch (err) {
       console.error(err);
+      alert(err.message);
     }
   };
 
