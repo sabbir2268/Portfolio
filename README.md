@@ -2,7 +2,7 @@
 
 A full-stack personal portfolio for showcasing projects, skills, experience and blogs, with a protected admin dashboard for managing projects.
 
-**Live site:** [https://re-dev-portfolio.vercel.app](https://re-dev-portfolio.vercel.app)
+**Live site:** [mdsabbirrahman.vercel.app](https://mdsabbirrahman.vercel.app/)
 
 **Backend API:** `https://portfolio-3ukl.onrender.com`
 
